@@ -28,14 +28,13 @@ module.exports = {
 
         const category = message.guild.channels.cache.get(config.discord.categories.tickets);
 
-        if (!category) {
+        if (!category || category.type !== ChannelType.GuildCategory) {
             message.channel.send("There is no ticket category. Please contact a Admin!");
             return;
         }
 
-        const ticket = await message.guild.channels.create({
+        const ticket = await category.children.create({
             name: `🎫-${message.author.username}-${message.author.discriminator}-ticket`,
-            parent: category,
             type: ChannelType.GuildText,
             permissionOverwrites: [
                 {
@@ -50,6 +49,12 @@ module.exports = {
                 },
             ],
         }).catch(console.error);
+
+        if (!ticket) {
+            message.channel.send("Failed to create a ticket.");
+            
+            return;
+        }
 
         ticket.setTopic(`The user that made the ticket is <@${message.author.id}> (${message.author.id})`);
 

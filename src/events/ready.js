@@ -39,15 +39,32 @@ module.exports = {
             await client.cache.set("users", JSON.stringify(await ptero.nodes.fetchUsers()), 600000)
         }, 600000);
 
-        let statusMessage = await client.guilds.cache.get(config.bot.guild)?.channels?.cache?.get(config.bot.nodeStatus.channelId)?.messages?.fetch(config.bot.nodeStatus.messageId);
+        // let statusMessage = await client.guilds.cache.get(config.bot.guild)?.channels?.cache?.get(config.bot.nodeStatus.channelId)?.messages?.fetch(config.bot.nodeStatus.messageId);
+        const statusMessageChannel = client.guilds.cache.get(config.bot.guild)?.channels?.cache?.get(config.bot.nodeStatus.channelId);
+
+        if (!statusMessageChannel || !statusMessageChannel.isTextBased()) {
+            console.warn(chalk.yellow("[WARNING]"), "Node Status Channel Not Found or Not a Text Channel!");
+
+            return;
+        }
 
         setInterval(async () => {
+            let statusMessage = await statusMessageChannel.messages.fetch(config.bot.nodeStatus.messageId).catch(async () => {
+                statusMessage = await statusMessageChannel.send('Waiting...').catch(() => {
+                    console.warn(chalk.yellow("[WARNING]"), "Failed to send Node Status Message!");
+                })
+
+                if (statusMessage.id) {
+                    config.bot.nodeStatus.messageId = statusMessage.id
+                    
+                    fs.writeFileSync('./config.json', JSON.stringify(config, null, 4))
+                };
+            })
+
             if (!statusMessage) {
-                statusMessage = await client.guilds.cache.get(config.bot.guild)?.channels?.cache?.get(config.bot.nodeStatus.channelId)?.send('Waiting...')
+                console.warn(chalk.yellow("[WARNING]"), "Failed to fetch Node Status Message!");
 
-                config.bot.nodeStatus.messageId = statusMessage.id;
-
-                fs.writeFileSync('./config.json', JSON.stringify(config, null, 4))
+                return;
             }
 
             const nodes = await ptero.nodes.getNodes();

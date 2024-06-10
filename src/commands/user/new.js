@@ -38,7 +38,7 @@ module.exports = {
     run: async (client, message, args) => {
         const userCategory = client.channels.cache.get(config.discord.categories.userCreation);
 
-        if (!userCategory) {
+        if (!userCategory || userCategory.type !== ChannelType.GuildCategory) {
             message.reply("The user category does not exist! Please contact a admin!");
             return;
         }
@@ -50,7 +50,7 @@ module.exports = {
             return;
         }
 
-        const chan = await userCategory.create({
+        const chan = await userCategory.children.create({
             name: `${message.author.username}-${message.author.discriminator}`,
             type: ChannelType.GuildText,
             permissionOverwrites: [

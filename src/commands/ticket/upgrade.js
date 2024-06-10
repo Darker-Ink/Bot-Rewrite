@@ -1,6 +1,6 @@
 const punishmentsSchema = require("../../utils/Schemas/Punishments");
 const config = require("../../config.json");
-const { Client, Message, EmbedBuilder, Colors } = require("discord.js");
+const { Client, Message, EmbedBuilder, Colors, TextChannel } = require("discord.js");
 
 module.exports = {
     name: "upgrade",
@@ -29,11 +29,16 @@ module.exports = {
             return;
         }
 
-        await message.channel.permissionOverwrites.edit(config.discord.roles.staff, {
+        /**
+         * @type {TextChannel}
+         */
+        const channel = message.channel;
+
+        await channel.permissionOverwrites.edit(config.discord.roles.staff, {
             ViewChannel: false,
         });
 
-        await message.channel.permissionOverwrites.edit(config.discord.roles.admin, {
+        await channel.permissionOverwrites.edit(config.discord.roles.admin, {
             ViewChannel: true,
         });
 

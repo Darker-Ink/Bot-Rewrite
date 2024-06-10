@@ -1,6 +1,6 @@
 const punishmentsSchema = require("../../utils/Schemas/Punishments");
 const config = require("../../config.json");
-const { Client, Message, EmbedBuilder, Colors } = require("discord.js");
+const { Client, Message, EmbedBuilder, Colors, TextChannel } = require("discord.js");
 
 module.exports = {
     name: "downgrade",
@@ -22,14 +22,19 @@ module.exports = {
      */
     run: async (client, message, args) => {
 
-        const userData = await punishmentsSchema.findOne({ userId: message.author.id })
+        const userData = await punishmentsSchema.findOne({ userId: message.author.id });
 
         if (userData && userData.ticketBanned) {
             message.channel.send("You have been banned from making a ticket.");
             return;
         }
 
-        await message.channel.permissionOverwrites.edit(config.discord.roles.staff, {
+        /**
+         * @type {TextChannel}
+         */
+        const channel = message.channel;
+
+        await channel.permissionOverwrites.edit(config.discord.roles.staff, {
             ViewChannel: true,
         });
 
@@ -43,9 +48,9 @@ module.exports = {
                 .setDescription(`**By**: ${message.author.tag} (${message.author.id})\n**Ticket**: ${message.channel} (${message.channelId})`)
                 .setTimestamp()
                 .setColor(Colors.Red)
-                .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true }) })
+                .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true }) });
 
             ticketLoggingChannel.send({ embeds: [embed] });
         }
     },
-}
+};

@@ -1,6 +1,6 @@
 const punishmentsSchema = require("../../utils/Schemas/Punishments");
 const config = require("../../config.json");
-const { Client, Message, EmbedBuilder, Colors } = require("discord.js");
+const { Client, Message, EmbedBuilder, Colors, TextChannel } = require("discord.js");
 
 module.exports = {
     name: "add",
@@ -39,7 +39,12 @@ module.exports = {
             return;
         }
 
-        await message.channel.permissionOverwrites.edit(user, {
+        /**
+         * @type {TextChannel}
+         */
+        const channel = message.channel;
+
+        await channel.permissionOverwrites.edit(user, {
             ViewChannel: true,
             SendMessages: true,
             AddReactions: true,
